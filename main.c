@@ -39,6 +39,7 @@ static int read_board(int board[SIZE][SIZE], const char *path) {
 			}
 		}
 	}
+ 
 
 	if (path) fclose(fp);
 	return 1;

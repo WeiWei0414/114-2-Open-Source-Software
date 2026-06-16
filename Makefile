@@ -7,7 +7,7 @@ KBUILD_FLAGS := LOCALVERSION=
 # kernel module target
 obj-m += sudoku_module.o
 
-.PHONY: all userspace prepare-wsl2-kernel integration-test clean
+.PHONY: all userspace prepare-wsl2-kernel integration-test clean test
 
 # default: build the kernel module
 all:
@@ -31,3 +31,13 @@ integration-test:
 clean:
 	$(MAKE) -C $(KDIR) M=$(PWD) $(KBUILD_FLAGS) clean
 	rm -f sudoku_validator sudoku-cli
+
+test: sudoku_validator
+	@echo "==> Starting userspace validator unit tests..."
+	@echo "Test 1: Validating correct board (test-board/correct-board.txt)"
+	@./sudoku_validator test-board/correct-board.txt | grep "Sudoku solution is valid." > /dev/null || (echo "  [FAIL ✗] Correct board validation failed!" && exit 1)
+	@echo "  [PASS ✓] Correct board validated successfully."
+	@echo "Test 2: Validating incorrect board (test-board/incorrect-board.txt)"
+	@./sudoku_validator test-board/incorrect-board.txt | grep "Sudoku solution is invalid." > /dev/null || (echo "  [FAIL ✗] Incorrect board was not caught!" && exit 1)
+	@echo "  [PASS ✓] Incorrect board rejected successfully."
+	@echo "==> All unit tests passed"
